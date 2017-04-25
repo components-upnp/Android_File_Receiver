@@ -30,7 +30,7 @@ public class FileReceiverController {
     }
 
     @UpnpStateVariable(defaultValue = "null", sendEvents = false)
-    private byte[] file = null;
+    private String file = null;
 
     @UpnpStateVariable(defaultValue = "false", sendEvents = false)
     private boolean receiving = false;
@@ -44,7 +44,7 @@ public class FileReceiverController {
     }
 
     @UpnpAction
-    public void setFile(@UpnpInputArgument(name = "NewFileValue") byte[] newFileValue) {
+    public void setFile(@UpnpInputArgument(name = "NewFileValue") String newFileValue) {
         file = newFileValue;
         getPropertyChangeSupport().firePropertyChange("file",null,file);
     }

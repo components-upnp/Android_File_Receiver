@@ -70,4 +70,8 @@ public class Service {
     public ServiceConnection getService() {
         return serviceConnection;
     }
+
+    public void stop() {
+        upnpService.get().shutdown();
+    }
 }
