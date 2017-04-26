@@ -22,6 +22,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import xdroid.toaster.Toaster;
 
@@ -37,11 +41,25 @@ public class AppService extends Service {
     private ReceiverNetworkThread receiverNetworkThread;
     private Socket socket;
     private MediaPlayer mediaPlayer;
+    private Context context;
+    private  Logger log;
 
     @Override
     public void onCreate(){
-        service = new com.example.comkostiuk.android_audio_reader.upnp.Service();
+
+
+        File dir = new File(Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/");
+
+        if (!dir.exists()) {
+            dir.mkdir();
+            dir.setReadable(true);
+            dir.setExecutable(true);
+        }
+
+        service = new com.example.comkostiuk.android_audio_reader.upnp.Service(log);
         serviceConnection = service.getService();
+
+        context = this;
 
         mediaPlayer = new MediaPlayer();
 
@@ -80,11 +98,20 @@ public class AppService extends Service {
                     @Override
                     public void propertyChange(PropertyChangeEvent evt) {
                         if (evt.getPropertyName().equals("file")) {
-                            if ( ((String)evt.getNewValue()) == "fin" ) {
+                            log.log(Level.INFO,(String) evt.getNewValue());
+                            if ( ((String)evt.getNewValue()).equals("fin") ) {
                                 try {
+
                                     mediaPlayer.setDataSource(openFileOutput(Environment.getExternalStorageDirectory().getPath() + "/test.mp3", MODE_PRIVATE).getFD());
                                     mediaPlayer.prepare();
-                                    mediaPlayer.start();
+                                    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                        @Override
+                                        public void onPrepared(MediaPlayer mp) {
+                                            Toaster.toast("Lecture fichier audio!!!");
+                                            mediaPlayer.start();
+                                        }
+                                    });
+
                                 } catch (FileNotFoundException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {

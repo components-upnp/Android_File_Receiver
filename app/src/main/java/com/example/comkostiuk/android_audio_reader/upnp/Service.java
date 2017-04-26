@@ -11,6 +11,8 @@ import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.model.types.UDN;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by comkostiuk on 20/04/2017.
@@ -21,7 +23,8 @@ public class Service {
     private UDN udnRecorder;
     private ServiceConnection serviceConnection;
 
-    public Service() {
+
+    public Service(final Logger log) {
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -34,7 +37,9 @@ public class Service {
                 if (remoteControllerService == null) {
                     try {
                         System.err.println("CREATION DEVICE!!!");
-                        udnRecorder = new UDN(UUID.randomUUID());
+                        //udnRecorder = new UDN(UUID.randomUUID());
+                        udnRecorder = new SaveUDN().getUdn();
+                        log.log(Level.INFO, udnRecorder.toString());
                         LocalDevice remoteDevice = FileReceiverDevice.createDevice(udnRecorder);
 
                         upnpService.getRegistry().addDevice(remoteDevice);

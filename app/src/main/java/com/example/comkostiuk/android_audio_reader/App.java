@@ -43,6 +43,7 @@ public class App extends AppCompatActivity {
     private Socket socket;
     private BufferedReader fileReader;
     private BufferedReader sortie;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,7 @@ public class App extends AppCompatActivity {
 
        finish();
 
+        context = this;
        /* StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
         StrictMode.setThreadPolicy(policy);
@@ -74,7 +76,7 @@ public class App extends AppCompatActivity {
 
     }
 
-    public void set() {
+    /*public void set() {
         service.getRecorderLocalService().getManager().getImplementation().getPropertyChangeSupport()
                 .addPropertyChangeListener(new PropertyChangeListener() {
                     @Override
@@ -93,7 +95,7 @@ public class App extends AppCompatActivity {
                             Toaster.toast("Reception fichier...");
                             try {
                                 socket = new Socket("192.168.43.223", 10302);
-                                new Thread( new ReceiverNetworkThread(socket)).start();
+                                new Thread( new ReceiverNetworkThread(socket, context)).start();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -101,5 +103,5 @@ public class App extends AppCompatActivity {
                         }
                     }
                 });
-    }
+    }*/
 }
