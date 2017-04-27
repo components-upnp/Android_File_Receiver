@@ -13,6 +13,10 @@ import java.beans.PropertyChangeSupport;
  * Created by comkostiuk on 20/04/2017.
  */
 
+
+/**
+ * Description du service UPnP offert par le composant
+ * */
 @UpnpService(
         serviceType = @UpnpServiceType(value = "FileReceiverController"),
         serviceId = @UpnpServiceId("FileReceiverController")

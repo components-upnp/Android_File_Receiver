@@ -24,10 +24,10 @@ import xdroid.toaster.Toaster;
  * Created by mkostiuk on 26/04/2017.
  */
 
+/**
+ * Classe permettant de récuperer l'UDN du composant ou de le générer s'il n'existe pas encore
+ * */
 public class SaveUDN {
-
-
-
 
     public UDN getUdn() throws IOException {
 
@@ -43,7 +43,6 @@ public class SaveUDN {
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line = br.readLine();
 
-        System.err.println("recup UDN");
 
         if ((line != null) || (line == "")) {
             ret =  UDN.valueOf(line);
@@ -51,7 +50,6 @@ public class SaveUDN {
         else {
             ret = new UDN(UUID.randomUUID());
             OutputStream o = new FileOutputStream(fi);
-            //BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(o));
             o.write(ret.toString().getBytes());
         }
         Toaster.toast("UDN: " + ret.toString());

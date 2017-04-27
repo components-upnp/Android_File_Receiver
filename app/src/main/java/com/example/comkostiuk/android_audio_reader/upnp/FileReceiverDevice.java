@@ -18,6 +18,9 @@ import org.fourthline.cling.model.types.UDN;
  * Created by comkostiuk on 20/04/2017.
  */
 
+/**
+ * Classe décrivant le composant UPnP FileReceiver
+ * */
 public class FileReceiverDevice {
     static LocalDevice createDevice(UDN udn)
             throws ValidationException, LocalServiceBindingException {

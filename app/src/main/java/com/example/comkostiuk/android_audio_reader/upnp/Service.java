@@ -10,7 +10,6 @@ import org.fourthline.cling.model.meta.LocalService;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.model.types.UDN;
 
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,9 +21,13 @@ public class Service {
     private AndroidUpnpService upnpService;
     private UDN udnRecorder;
     private ServiceConnection serviceConnection;
+    private Logger log;
 
 
-    public Service(final Logger log) {
+    public Service(final Logger l) {
+
+        log = l;
+
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -36,9 +39,10 @@ public class Service {
                 // Register the device when this activity binds to the service for the first time
                 if (remoteControllerService == null) {
                     try {
+                        log.log(Level.INFO, "CREATION DEVICE");
                         System.err.println("CREATION DEVICE!!!");
-                        //udnRecorder = new UDN(UUID.randomUUID());
                         udnRecorder = new SaveUDN().getUdn();
+                        log.log(Level.INFO,"UDN device: " + udnRecorder);
                         log.log(Level.INFO, udnRecorder.toString());
                         LocalDevice remoteDevice = FileReceiverDevice.createDevice(udnRecorder);
 
@@ -46,11 +50,13 @@ public class Service {
 
                     } catch (Exception ex) {
                         System.err.println("Creating Android remote controller device failed !!!");
+                        log.log(Level.SEVERE, ex.toString());
                         return;
                     }
                 }
 
                 System.out.println("Creation device reussie...");
+                log.log(Level.INFO, "Création device reussie...");
             }
 
             @Override
@@ -77,6 +83,7 @@ public class Service {
     }
 
     public void stop() {
+        log.log(Level.INFO, "Arrêt du service UPnP!!!");
         upnpService.get().shutdown();
     }
 }

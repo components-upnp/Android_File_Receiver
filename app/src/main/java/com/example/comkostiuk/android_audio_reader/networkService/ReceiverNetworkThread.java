@@ -17,12 +17,21 @@ import xdroid.toaster.Toaster;
  * Created by mkostiuk on 25/04/2017.
  */
 
+/*
+* Classe permettant de sauvegarder les fichiers reçus dans la mémoire interne de l'appareil.
+* Il est possible de recevoir plusieurs fichiers d'affilé, on ajout un numéro à la fin afin
+* de les différencier.
+*
+* Exemple: Lors d'un cours, le professeur envoie plusieurs fichiers audios explicatifs, un par slide
+*  ils seront tous sauvegardés au même endroit et avec le même nom, mais avec un numéro différent.
+* */
 public class ReceiverNetworkThread implements Runnable  {
 
     private Socket socket;
     private byte[] buffer;
     private InputStream inputStream;
     private OutputStream outputStream;
+
 
     public ReceiverNetworkThread(Socket s) throws IOException {
 
@@ -35,7 +44,7 @@ public class ReceiverNetworkThread implements Runnable  {
 
         socket = s;
         inputStream = socket.getInputStream();
-        File f = new File(Environment.getExternalStorageDirectory().getPath() + "/test.mp3");
+        File f = new File(nameFic());
         f.setWritable(true);
         outputStream = new FileOutputStream(f);
         buffer = new byte[16192];
@@ -49,6 +58,7 @@ public class ReceiverNetworkThread implements Runnable  {
         try {
             while ((n = inputStream.read(buffer)) != -1)
                 outputStream.write(buffer,0,n);
+
             outputStream.close();
             inputStream.close();
             socket.close();
@@ -57,5 +67,19 @@ public class ReceiverNetworkThread implements Runnable  {
             e.printStackTrace();
         }
 
+    }
+
+    //On construit le nom du fichier selon le nombre de fichiers contenus dans le répertoire Audio
+    public String nameFic() {
+        String ret;
+
+        File dir = new File(Environment.getExternalStorageDirectory().getPath()
+                + "/FileReceiver/Audio/");
+
+        int nb = dir.listFiles().length;
+
+        ret = Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/Audio/test" + nb + ".mp3";
+
+        return ret;
     }
 }
