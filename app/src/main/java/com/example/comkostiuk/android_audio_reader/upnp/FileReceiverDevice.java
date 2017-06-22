@@ -26,7 +26,7 @@ public class FileReceiverDevice {
             throws ValidationException, LocalServiceBindingException {
 
         DeviceType type =
-                new UDADeviceType("FileReceiverController", 1);
+                new UDADeviceType("FileReceiver", 1);
 
         DeviceDetails details =
                 new DeviceDetails(
