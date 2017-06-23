@@ -57,7 +57,7 @@ public class AppService extends Service {
     private com.example.comkostiuk.android_audio_reader.upnp.Service service;
     private ServiceConnection serviceConnection;
     private ReceiverNetworkThread receiverNetworkThread;
-    private Socket socket;
+    private Socket socket = null;
     private Context context;
     private int nbFic;
     private String ip;
@@ -162,29 +162,26 @@ public class AppService extends Service {
                             //Traitement événement valeur == fin
                             //Un fichier a été reçu, on créé un Thread
 
-                                Toaster.toast("Connexion serveur distant...");
-                                HashMap<String,String> args = (HashMap<String, String>) evt.getNewValue();
-                                ip = args.get("IP");
-                                ip = ip.split(":")[1];
-                                fileName = args.get("FILENAME");
-                                System.err.println("File name args : " + fileName);
-                                pathFile = dir.concat(fileName);
-                                System.err.println("PathFile : " + pathFile);
+                            Toaster.toast("Connexion serveur distant...");
+                            HashMap<String,String> args = (HashMap<String, String>) evt.getNewValue();
+                            ip = args.get("IP");
+                            ip = ip.split(":")[1];
+                            ip = ip.trim();
+                            fileName = args.get("FILENAME");
+                            System.err.println("File name args : " + fileName);
+                            pathFile = dir.concat(fileName);
+                            System.err.println("PathFile : " + pathFile);
 
-                        }
-                        else if (evt.getPropertyName().equals("receiving")) {
-                            if ((boolean) evt.getNewValue()) {
-                                try {
-                                    socket = new Socket("192.168.0.101", 10302);
-                                    receiverNetworkThread = new ReceiverNetworkThread(socket, pathFile);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    System.err.println("ENCULE DE MERDE!!!!!!!!!!");
-                                }
 
+                            try {
+                                socket = new Socket(ip, 10302);
+                                receiverNetworkThread = new ReceiverNetworkThread(socket, pathFile);
                                 Toaster.toast("Reception fichier...");
                                 new Thread(receiverNetworkThread).start();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
+
                         }
                     }
                 });
