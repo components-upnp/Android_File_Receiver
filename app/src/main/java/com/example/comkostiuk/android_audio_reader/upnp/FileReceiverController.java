@@ -43,16 +43,6 @@ public class FileReceiverController {
     @UpnpStateVariable(defaultValue = "null", sendEvents = false)
     private String file = null;
 
-    @UpnpStateVariable(defaultValue = "false", sendEvents = false)
-    private boolean receiving = false;
-
-    @UpnpAction
-    public void setReceiving(@UpnpInputArgument(name = "NewReceivingValue") boolean newReceivingValue) {
-        boolean oldValue = receiving;
-        receiving = newReceivingValue;
-
-        getPropertyChangeSupport().firePropertyChange("receiving",oldValue,receiving);
-    }
 
     @UpnpAction
     public void setFile(@UpnpInputArgument(name = "NewFileValue") String newFileValue) throws IOException, SAXException, ParserConfigurationException {
