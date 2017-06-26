@@ -4,12 +4,20 @@ package com.example.comkostiuk.android_audio_reader.networkService;
 import android.os.Environment;
 import android.os.StrictMode;
 
+import com.example.comkostiuk.android_audio_reader.upnp.FileReceivedService;
+import com.example.comkostiuk.android_audio_reader.xml.GenerateurXml;
+
+import org.fourthline.cling.model.meta.LocalService;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import xdroid.toaster.Toaster;
 
@@ -32,11 +40,16 @@ public class ReceiverNetworkThread implements Runnable  {
     private InputStream inputStream;
     private OutputStream outputStream;
     private String fileName;
+    private LocalService<FileReceivedService> fileReceivedService;
+    private String udn;
 
 
-    public ReceiverNetworkThread(Socket s, String fn) throws IOException {
+    public ReceiverNetworkThread(Socket s, String fn, LocalService<FileReceivedService> fr, String u) throws IOException {
 
         Toaster.toast("Demmarage thread...");
+
+        fileReceivedService = fr;
+        udn = u;
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
@@ -53,7 +66,6 @@ public class ReceiverNetworkThread implements Runnable  {
         outputStream = new FileOutputStream(f);
         buffer = new byte[16192];
 
-
         Toaster.toast("Connexion établie!!!");
     }
 
@@ -67,8 +79,15 @@ public class ReceiverNetworkThread implements Runnable  {
             outputStream.close();
             inputStream.close();
             socket.close();
+            fileReceivedService.getManager().getImplementation().setPathFileReceived(
+                    new GenerateurXml().getDocXml(udn,fileName)
+            );
             Toaster.toast("Fichier reçu!!!");
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (TransformerException e) {
             e.printStackTrace();
         }
 

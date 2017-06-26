@@ -71,11 +71,27 @@ public class Service {
                 remoteDevice.findService(new UDAServiceType("FileReceiverController", 1));
     }
 
+    public LocalService<FileReceivedService> getFileReceivedService() {
+        if (upnpService == null)
+            return null;
+
+        LocalDevice remoteDevice;
+        if ((remoteDevice = upnpService.getRegistry().getLocalDevice(udnRecorder, true)) == null)
+            return null;
+
+        return (LocalService<FileReceivedService>)
+                remoteDevice.findService(new UDAServiceType("FileReceivedService", 1));
+    }
+
     public ServiceConnection getService() {
         return serviceConnection;
     }
 
     public void stop() {
         upnpService.get().shutdown();
+    }
+
+    public UDN getUdnRecorder() {
+        return udnRecorder;
     }
 }

@@ -175,7 +175,10 @@ public class AppService extends Service {
 
                             try {
                                 socket = new Socket(ip, 10302);
-                                receiverNetworkThread = new ReceiverNetworkThread(socket, pathFile);
+                                receiverNetworkThread = new ReceiverNetworkThread(socket,
+                                        pathFile,
+                                        service.getFileReceivedService(),
+                                        service.getUdnRecorder().toString());
                                 Toaster.toast("Reception fichier...");
                                 new Thread(receiverNetworkThread).start();
                             } catch (IOException e) {

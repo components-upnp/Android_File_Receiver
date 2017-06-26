@@ -42,12 +42,18 @@ public class FileReceiverDevice {
                 new DefaultServiceManager<>(service, FileReceiverController.class)
         );
 
+        LocalService<FileReceivedService> fileReceivedService =
+                new AnnotationLocalServiceBinder().read(FileReceivedService.class);
+        fileReceivedService.setManager(
+                new DefaultServiceManager<FileReceivedService>(fileReceivedService, FileReceivedService.class)
+        );
+
         return new LocalDevice(
                 new DeviceIdentity(udn),
                 type,
                 details,
 
-                service
+                new LocalService[] {service, fileReceivedService}
         );
     }
 }
