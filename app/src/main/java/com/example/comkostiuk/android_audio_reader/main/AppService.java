@@ -1,4 +1,4 @@
-package com.example.comkostiuk.android_audio_reader;
+package com.example.comkostiuk.android_audio_reader.main;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
@@ -6,15 +6,15 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import com.example.comkostiuk.android_audio_reader.audio.LecteurAudioThread;
+import com.example.comkostiuk.android_audio_reader.R;
 import com.example.comkostiuk.android_audio_reader.networkService.ReceiverNetworkThread;
 
 import org.fourthline.cling.android.AndroidUpnpServiceImpl;
@@ -22,10 +22,10 @@ import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.FileHandler;
@@ -57,30 +57,33 @@ public class AppService extends Service {
     private com.example.comkostiuk.android_audio_reader.upnp.Service service;
     private ServiceConnection serviceConnection;
     private ReceiverNetworkThread receiverNetworkThread;
-    private Socket socket;
-    private MediaPlayer mediaPlayer;
+    private Socket socket = null;
     private Context context;
-    private  Logger log;
-    private ArrayList<Thread> fileAudio;
     private int nbFic;
-    private boolean isPlaying;
-    private Thread lectureCourante;
+    private String ip;
+    private String fileName;
+    private String dir;
+    private String pathFile ="";
 
     @Override
-    public void onCreate(){
+    public int onStartCommand(Intent intent, int flags, int startId){
+
+        new Thread().start();
+        displayNotification(this);
 
 
         //On commence par préparer les répertoires de l'application.
         //On initialise aussi un Logger
         File appDir = new File(Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/");
         File audioDir = new File(Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/Audio/");
-        try {
-            Handler fh = new FileHandler(Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/log.log", false);
-            log = Logger.getLogger("com.example.comkostiuk_audio_reader");
-            log.addHandler(fh);
-        } catch (IOException e) {
-            e.printStackTrace();
+        dir = Environment.getExternalStorageDirectory().getPath().concat("/FileReceiver/Audio/") ;
+
+        if (Build.BRAND.toString().equals("htc_europe")) {
+            appDir = new File("/mnt/emmc/FileReceiver/");
+            audioDir = new File("/mnt/emmc/FileReceiver/Audio/");
+            dir = "/mnt/emmc/FileReceiver/Audio/";
         }
+
 
         if (!appDir.exists()) {
             appDir.mkdir();
@@ -100,14 +103,12 @@ public class AppService extends Service {
         //Il n'y a pour l'instant aucun fichiers reçus
         nbFic = 0;
 
-        service = new com.example.comkostiuk.android_audio_reader.upnp.Service(log);
+        service = new com.example.comkostiuk.android_audio_reader.upnp.Service();
         serviceConnection = service.getService();
 
         context = this;
 
-        //création du lecteur audion, il ne lit pas alors isPlaying est à false
-        mediaPlayer = new MediaPlayer();
-        isPlaying = false;
+
 
         //On lance le service UPnP
         getApplicationContext().bindService(new Intent(this, AndroidUpnpServiceImpl.class),
@@ -131,7 +132,7 @@ public class AppService extends Service {
             }
         }, 5000);
 
-        fileAudio = new ArrayList<>();
+        return START_NOT_STICKY;
     }
 
     //On récupère l'Intent créé avec l'application
@@ -150,26 +151,6 @@ public class AppService extends Service {
 
     public void set() {
 
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                Toaster.toast("Test fin lecture!!!");
-
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-
-                //Si des fichiers sont en attente de lecture, on passe au suivant
-                if (!fileAudio.isEmpty()) {
-                    Toaster.toast("Lecture fichier: "+nbFic);
-                    lectureCourante = fileAudio.remove(0);
-                    lectureCourante.start();
-                    isPlaying = true;
-                }
-                else {  //sinon on stoppe les lectures et on attend
-                    isPlaying = false;
-                }
-            }
-        });
 
         //Listener décrivant les actions à faire lors de la réception d'évènements UPnP
         service.getRecorderLocalService().getManager().getImplementation().getPropertyChangeSupport()
@@ -178,42 +159,29 @@ public class AppService extends Service {
                     public void propertyChange(PropertyChangeEvent evt) {
                         //Evénement de type file
                         if (evt.getPropertyName().equals("file")) {
-                            log.log(Level.INFO,(String) evt.getNewValue());
                             //Traitement événement valeur == fin
                             //Un fichier a été reçu, on créé un Thread
-                            if ( ((String)evt.getNewValue()).equals("fin") ) {
-                                fileAudio.add(new LecteurAudioThread(nbFic, mediaPlayer));
-                                nbFic++;
 
-                                if (! isPlaying) {
-                                    isPlaying = true;
-                                    lectureCourante = fileAudio.remove(0);
-                                    lectureCourante.start();
-                                }
-                            }
-                            else if (((String)evt.getNewValue()).equals("lol")) {
-                                displayNotification(context);
-                            }
-                            else {
-                                Toaster.toast("Connexion serveur distant...");
-                                String address = (String) evt.getNewValue();
-                                int port = Integer.getInteger((String) evt.getOldValue());
-                            }
+                            Toaster.toast("Connexion serveur distant...");
+                            HashMap<String,String> args = (HashMap<String, String>) evt.getNewValue();
+                            ip = args.get("IP");
+                            ip = ip.split(":")[1];
+                            ip = ip.trim();
+                            fileName = args.get("FILENAME");
+                            System.err.println("File name args : " + fileName);
+                            pathFile = dir.concat(fileName);
+                            System.err.println("PathFile : " + pathFile);
 
 
-                        }
-                        else if (evt.getPropertyName().equals("receiving")) {
-                            if ((boolean) evt.getNewValue()) {
-                                try {
-                                    socket = new Socket("192.168.43.223", 10302);
-                                    receiverNetworkThread = new ReceiverNetworkThread(socket);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
+                            try {
+                                socket = new Socket(ip, 10302);
+                                receiverNetworkThread = new ReceiverNetworkThread(socket, pathFile);
                                 Toaster.toast("Reception fichier...");
                                 new Thread(receiverNetworkThread).start();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
+
                         }
                     }
                 });
@@ -266,6 +234,11 @@ public class AppService extends Service {
             if (ACTION_1.equals(action)) {
                 // TODO: handle action 1.
                 System.out.println("Action 1 notification");
+
+                Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                getApplicationContext().sendBroadcast(it);
+
+                System.exit(0);
             }
         }
     }

@@ -31,9 +31,10 @@ public class ReceiverNetworkThread implements Runnable  {
     private byte[] buffer;
     private InputStream inputStream;
     private OutputStream outputStream;
+    private String fileName;
 
 
-    public ReceiverNetworkThread(Socket s) throws IOException {
+    public ReceiverNetworkThread(Socket s, String fn) throws IOException {
 
         Toaster.toast("Demmarage thread...");
 
@@ -41,13 +42,17 @@ public class ReceiverNetworkThread implements Runnable  {
 
         StrictMode.setThreadPolicy(policy);
 
+        fileName = fn;
+
+        System.err.println(fileName);
 
         socket = s;
         inputStream = socket.getInputStream();
-        File f = new File(nameFic());
+        File f = new File(fileName);
         f.setWritable(true);
         outputStream = new FileOutputStream(f);
         buffer = new byte[16192];
+
 
         Toaster.toast("Connexion établie!!!");
     }
@@ -69,17 +74,4 @@ public class ReceiverNetworkThread implements Runnable  {
 
     }
 
-    //On construit le nom du fichier selon le nombre de fichiers contenus dans le répertoire Audio
-    public String nameFic() {
-        String ret;
-
-        File dir = new File(Environment.getExternalStorageDirectory().getPath()
-                + "/FileReceiver/Audio/");
-
-        int nb = dir.listFiles().length;
-
-        ret = Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/Audio/test" + nb + ".mp3";
-
-        return ret;
-    }
 }

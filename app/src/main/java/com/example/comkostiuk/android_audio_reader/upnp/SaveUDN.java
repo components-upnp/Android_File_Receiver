@@ -1,6 +1,7 @@
 package com.example.comkostiuk.android_audio_reader.upnp;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 
 import org.fourthline.cling.model.types.UDN;
@@ -32,8 +33,11 @@ public class SaveUDN {
     public UDN getUdn() throws IOException {
 
         UDN ret;
-        File fi = new File(Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/udn.txt");
-
+        File fi;
+        if (Build.BRAND.toString().equals("htc_europe"))
+            fi = new File("/mnt/emmc/FileReceiver/udn.txt");
+        else
+            fi = new File(Environment.getExternalStorageDirectory().getPath() + "/FileReceiver/udn.txt");
         if (!fi.exists()) {
             fi.createNewFile();
             fi.setWritable(true);
