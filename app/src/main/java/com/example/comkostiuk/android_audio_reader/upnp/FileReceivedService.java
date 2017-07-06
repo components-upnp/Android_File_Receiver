@@ -36,6 +36,6 @@ public class FileReceivedService {
     @UpnpAction(name = "SetPathFileReceived")
     public void setPathFileReceived(@UpnpInputArgument(name = "PathFileReceived") String p) {
         pathFileReceived = p;
-        getPropertyChangeSupport().firePropertyChange("pathFileReceived", "", pathFileReceived);
+        getPropertyChangeSupport().firePropertyChange("PathFileReceived", "", pathFileReceived);
     }
 }
