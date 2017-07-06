@@ -10,6 +10,8 @@ On peut imaginer que ce composant soit utilisé par des étudiants afin de suivr
 les explications du professeur via un flux/fichier audio.
 
 L'application se présente sous la fomre d'un service Android, il n'y a donc pas d'interfaces graphique. L'utilisateur recevra des popups lors de la connexion à un serveur et lors de la réception d'un fichier (l'avertissant du début/fin de transmission).
+L'application commencera à recevoir le fichier après avroir reçue un message XML contenant l'adresse IP de l'émetteur ainsi 
+que le nom du fichier.
 
 <strong>Lancement de l'application:</strong>
 
@@ -23,16 +25,20 @@ Cette application ne présente pas d'interface graphique, c'est un service en ar
 
 <strong>Spécification UPnP: </strong>
 
-Ce composant offre le service FileReceiverCOntroller dont voici la description:
+Ce composant offre deux services dont voici la description:
 
-  1) setReceiving(boolean newReceivingValue): permet d'avertir le composant du début/fin de la transmission
-  2) setAddresse(String newAddresseValue): permet de transmettre l'addresse du serveur distant au composant.
+  a) FileReceiverService :
   
-Ce service n'envoie aucun événement UPnP.
+    1) SetFile(String NewFileValue): action UPnP qui reçoit un message XML contenant l'adresse IP de l'émetteur ainsi que le nom du fichier à recevoir, ces paramètres sont ensuite transmis à l'application.
+    
+  b) FileReceivedService :
+  
+    1) SetPathFileReceived(String PathFileReceived) : action UPnP qui envoie un message XML contenant le chemin du fichier
+    reçu via un événement UPnP dont le nom est "PathFileReceived".
 
 Voici le schéma correspondant à ce composant:
 
-![alt tag](https://github.com/components-upnp/Android_File_Receiver/blob/master/File_Receiver.png)
+![alt tag](https://github.com/components-upnp/Android_File_Receiver/blob/master/Android_File_Receiver.png)
 
 <strong>Maintenance: </strong>
 
